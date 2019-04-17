@@ -9,10 +9,8 @@ import org.apache.spark.{SparkContext, SparkConf}
 import org.apache.spark.streaming._
 import org.apache.spark.TaskContext
 import scala.util.matching.Regex
-//object KafkaWordCount {
-object test{
+object scalaJob{
   def main(args: Array[String]) {
-    
     val kafkaParams = Map[String, Object](
       "bootstrap.servers" -> "172.17.0.59:9092",
       "key.deserializer" -> classOf[StringDeserializer],
