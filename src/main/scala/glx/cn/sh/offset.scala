@@ -1,6 +1,7 @@
 package glx.cn.sh
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.common.serialization.StringDeserializer
+import kafka.serializer.{StringDecoder, DefaultDecoder}
 import org.apache.spark.streaming.kafka010._
 import org.apache.spark.streaming.kafka010.LocationStrategies.PreferConsistent
 import org.apache.spark.streaming.kafka010.ConsumerStrategies.Subscribe
@@ -9,7 +10,9 @@ import org.apache.spark.{SparkContext, SparkConf}
 import org.apache.spark.streaming._
 import org.apache.spark.TaskContext
 import scala.util.matching.Regex
-object scalaJob{
+import org.apache.kafka.common._
+
+object offsetJob{
   def main(args: Array[String]) {
     val brokers = "172.17.0.59:9092"
     val group = "test-consumer-group"
@@ -21,15 +24,17 @@ object scalaJob{
       "auto.offset.reset" -> "latest",
       "enable.auto.commit" -> (false: java.lang.Boolean)
     )
-    ////////////////////////////////////////////////////////////////////////
-    //                           简单获取kafka数据                        //
-    val topics = Array("MetisTest")
+
+    val topics = Iterable("MetisTest")
     val conf = new SparkConf().setMaster("local[2]").setAppName("offset demo")
     val ssc = new StreamingContext(conf, Seconds(5))
+    var offsets: Map[TopicPartition, Long] = Map()
+    val tp =new TopicPartition("topic",1)
+    offsets += (tp -> 100000L)
     val stream = KafkaUtils.createDirectStream[String, String](
       ssc,
       PreferConsistent,
-      Subscribe[String, String](topics, kafkaParams)
+      ConsumerStrategies.Subscribe[String, String](topics, kafkaParams, offsets)
     )
     /////////////////////////////////////////////////////////////////////////
     
@@ -37,7 +42,7 @@ object scalaJob{
     stream.foreachRDD { rdd =>
       val offsetRanges = rdd.asInstanceOf[HasOffsetRanges].offsetRanges
       rdd.foreachPartition { iter =>
-        val o: OffsetRange = offsetRanges(TaskContext.get.partitionId)
+        val o: OffsetRange =offsetRanges(TaskContext.get.partitionId)
         println(s"${o.topic} ${o.partition} ${o.fromOffset} ${o.untilOffset}")
         //////////////////////////////////////////////////////////////
         //                      逐条打印数据                        //
@@ -61,11 +66,7 @@ object scalaJob{
       }
     }
 
-
     ssc.start()
     ssc.awaitTermination()
   }
-
-
-
 }
