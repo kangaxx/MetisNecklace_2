@@ -21,7 +21,7 @@ object offsetJob{
       "key.deserializer" -> classOf[StringDeserializer],
       "value.deserializer" -> classOf[StringDeserializer],
       "group.id" -> group,
-      "auto.offset.reset" -> "latest",
+      "auto.offset.reset" -> "earliest",
       "enable.auto.commit" -> (false: java.lang.Boolean)
     )
 
@@ -29,8 +29,8 @@ object offsetJob{
     val conf = new SparkConf().setMaster("local[2]").setAppName("offset demo")
     val ssc = new StreamingContext(conf, Seconds(5))
     var offsets: Map[TopicPartition, Long] = Map()
-    val tp =new TopicPartition("topic",1)
-    offsets += (tp -> 100000L)
+    val tp =new TopicPartition("MetisTest", 0)
+    offsets += (tp -> 29868290L)
     val stream = KafkaUtils.createDirectStream[String, String](
       ssc,
       PreferConsistent,
@@ -46,22 +46,22 @@ object offsetJob{
         println(s"${o.topic} ${o.partition} ${o.fromOffset} ${o.untilOffset}")
         //////////////////////////////////////////////////////////////
         //                      逐条打印数据                        //
-        //while(iter.hasNext){
-        //  println(s"iter value ${iter.next.value}")
-        //}
+        while(iter.hasNext){
+          println(s"iter value ${iter.next.value}")
+        }
         //////////////////////////////////////////////////////////////
 
         //////////////////////////////////////////////////////////////
         ////               逐条打印复合正则条件的数据             ////
         ////        只打印城市是 Shanghai并系统是 iOs的数据       ////
-        while(iter.hasNext){
-          val iterValue = iter.next.value
-          val strParttern : Regex = "\"Shanghai\".+\"iOs\"".r 
-          strParttern.findFirstMatchIn(iterValue) match {
-            case Some(_) => println(iterValue)
-            case None => 
-          }
-        }
+        ////while(iter.hasNext){
+        ////  val iterValue = iter.next.value
+        ////  val strParttern : Regex = "\"Shanghai\".+\"iOs\"".r 
+        ////  strParttern.findFirstMatchIn(iterValue) match {
+        ////    case Some(_) => println(iterValue)
+        ////    case None => 
+        ////  }
+        ////}
         //////////////////////////////////////////////////////////////
       }
     }
