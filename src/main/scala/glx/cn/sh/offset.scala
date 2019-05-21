@@ -47,7 +47,7 @@ object offsetJob{
         //////////////////////////////////////////////////////////////
         //                      逐条打印数据                        //
         while(iter.hasNext){
-          println(s"iter value ${iter.next.value}")
+          println(s"iter value ${iter.next.value} ")
         }
         //////////////////////////////////////////////////////////////
 
