@@ -9,6 +9,8 @@ import org.apache.spark.{SparkContext, SparkConf}
 import org.apache.spark.streaming._
 import org.apache.spark.TaskContext
 import scala.util.matching.Regex
+import redis.clients.jedis.Jedis
+
 object scalaJob{
   def main(args: Array[String]) {
     val brokers = "172.17.0.59:9092"
@@ -25,6 +27,8 @@ object scalaJob{
     //                           简单获取kafka数据                        //
     val topics = Array("MetisTest")
     val conf = new SparkConf().setMaster("local[2]").setAppName("offset demo")
+//    conf.set("spark.redis.host","127.0.0.1")
+//    conf.set("spark.redis.port","6379")
     val ssc = new StreamingContext(conf, Seconds(5))
     val stream = KafkaUtils.createDirectStream[String, String](
       ssc,
@@ -39,6 +43,9 @@ object scalaJob{
       rdd.foreachPartition { iter =>
         val o: OffsetRange = offsetRanges(TaskContext.get.partitionId)
         println(s"${o.topic} ${o.partition} ${o.fromOffset} ${o.untilOffset}")
+        val jedis = new Jedis("localhost", 6379);
+        jedis.lpush("fromOffset",s"${o.fromOffset}")
+        jedis.close()
         //////////////////////////////////////////////////////////////
         //                      逐条打印数据                        //
         //while(iter.hasNext){

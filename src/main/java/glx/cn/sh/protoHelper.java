@@ -11,7 +11,7 @@ public class protoHelper
   public  protoHelper(){}
 
   public interface pbSerializer{
-    public void initial(byte[] bytes); 
+    public void initial(byte[] bytes) throws Exception; 
     public String getDspName();
 //    public void setDspName(String name);
 //    public int getRtbId();
@@ -32,7 +32,7 @@ public class protoHelper
 
   public class tdSerializer implements pbSerializer{
     LogGroup lg;
-    public void initial(byte[] bytes){
+    public void initial(byte[] bytes) throws Exception{
       lg = LogGroup.parseFrom(bytes);
     }
 

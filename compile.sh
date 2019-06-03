@@ -1,1 +1,1 @@
-mvn clean scala:compile compile package
+mvn clean scala:compile compile package -Dspark

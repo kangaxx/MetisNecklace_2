@@ -27,6 +27,8 @@ object offsetJob{
 
     val topics = Iterable("MetisTest")
     val conf = new SparkConf().setMaster("local[2]").setAppName("offset demo")
+    conf.set("redis.host", "127.0.0.1")
+    conf.set("redis.port", "6379")
     val ssc = new StreamingContext(conf, Seconds(5))
     var offsets: Map[TopicPartition, Long] = Map()
     val tp =new TopicPartition("MetisTest", 0)
